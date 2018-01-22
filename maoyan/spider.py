@@ -1,43 +1,52 @@
+import json
 import re
-import  json
-import requests
 from multiprocessing import Pool
-from requests.exceptions import RequestException
 
+import requests
+from requests import RequestException
+
+
+#获取网页源代码
 def get_one_page(url):
-    response = requests.get(url)
     try:
+        response = requests.get(url)
         if response.status_code == 200:
             return response.text
         return None
     except RequestException:
         return None
 
-def parse_one_page(html):
-    pattern = re.compile('<dd>.*?board-index.*?>(\d+)</i>.*?data-src="(.*?)".*?</a>.*?title.*?>(.*?)</a>'
-                         + '.*?star">(.*?)</p>.*?releasetime">(.*?)</p>.*?</dd>', re.S)
+#从获取的网页源代码中截取重要的数据
+def parse_page(html):
+    pattern = re.compile('<dd>.*?board-index.*?">(\d+)</i>.*?data-src="(.*?)".*?</a>'
+                         + '.*?name.*?title.*?">(.*?)</a>.*?star">\n\s+(.*?)\n\s+</p>.*?releasetime">(.*?)</p>'
+                         + '.*?integer">(.*?)</i>.*?fraction">(.*?)</i>.*?</dd>', re.S)
     items = re.findall(pattern, html)
     for item in items:
         yield {
             'index': item[0],
-            'image': item[1],
+            'images': item[1],
             'title': item[2],
-            'actor': item[3],
-            'time': item[4]
+            'stars': item[3].strip()[3:],
+            'releasetime':item[4].strip()[5:],
+            'score': item[5] + item[6]
         }
 
-def write_one_page(content):
-    with open('result.txt', 'a', encoding='utf-8') as f:
-        f.write(json.dumps(content, ensure_ascii=False) + '\n')
+#写入文件
+def write_file(content):
+    with open('result.txt', 'a', encoding= 'utf-8') as f:
+        f.write(json.dumps(content, ensure_ascii= False) + '\n')
         f.close()
 
+#定义主函数
 def main(offset):
-    url = 'https://maoyan.com/board/6?offset=' + str(offset)
+    url  = 'https://maoyan.com/board/4?offset=' + str(offset)
     html = get_one_page(url)
-    for item in parse_one_page(html):
+    for item in parse_page(html):
         print(item)
-        write_one_page(item)
+        write_file(item)
 
+#判断语句
 if __name__ == '__main__':
     pool = Pool()
-    pool.map(main, [i*10 for i in range(10)])
+    pool.map(main, [i * 10 for i in range(10)])
