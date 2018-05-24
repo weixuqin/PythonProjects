@@ -92,9 +92,9 @@ def main(offset):
         detail_html = get_detail_page(detail_url)
         titles = parse_detail_title(detail_html)
         texts = parse_detail_page(detail_html)
-        #save_mysql(titles, texts)
-        for text in texts:
-            save_data(text)
+        save_mysql(titles, texts)
+        # for text in texts:
+        #     save_data(text)
 
 
 
