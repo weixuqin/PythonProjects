@@ -13,7 +13,7 @@ pycrypto==2.6.1
 pyparsing==2.2.0
 python-dateutil==2.7.3
 pytz==2018.4
-PyYAML==3.12
+PyYAML==5.4
 requests==2.19.1
 shellescape==3.4.1
 six==1.11.0
